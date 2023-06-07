@@ -1,4 +1,4 @@
-package com.abccompany.flightmanager;
+package com.abccompany.flightmanager.flight;
 
 public enum FlightCategory {
     ECONOMIC,
