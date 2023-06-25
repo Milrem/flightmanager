@@ -17,6 +17,7 @@ class FlightPolicyTest {
     @DisplayName("Given Economic Flight")
     class EconomicFlightPolicyTest {
         Flight economicFlight;
+        EconomicFlightService underTest = new EconomicFlightService();
 
         @BeforeEach
         void setup() {
@@ -41,60 +42,121 @@ class FlightPolicyTest {
             @Test
             @DisplayName("When addPassenger Then regular passenger should be added")
             void economicFlightAddPassengers() {
-                //Given
-                Passenger vipPassenger = new Passenger();
+                boolean regularPassengerAdded = underTest.addPassenger(economicFlight, regularPassenger);
+                assertTrue(regularPassengerAdded);
+            }
+
+            @Test
+            @DisplayName("When removePassenger Then regular passenger should be removed")
+            void economicFlightRemovePassengers() {
+                int totalPassengers = economicFlight.getPassengers().size();
+                underTest.addPassenger(economicFlight, regularPassenger);
+                assertEquals(++totalPassengers, economicFlight.getPassengers().size());
+                boolean removed = underTest.removePassenger(economicFlight, regularPassenger);
+                assertTrue(removed);
+            }
+        }
+
+        @Nested
+        @DisplayName("Given Vip Passenger")
+        class VipPassengerTest {
+            Passenger vipPassenger;
+
+            @BeforeEach
+            void setup() {
+                vipPassenger = new Passenger();
                 vipPassenger.setId("P2");
                 vipPassenger.setName("Maria");
                 vipPassenger.setVip(true);
+            }
 
-                //When
-                EconomicFlightService underTest = new EconomicFlightService();
-                boolean regularPassengerAdded = underTest.addPassenger(economicFlight, regularPassenger);
+            @Test
+            @DisplayName("When addPassenger Then vip passenger should be added")
+            void economicFlightAddPassengers() {
                 boolean vipPassengerAdded = underTest.addPassenger(economicFlight, vipPassenger);
-
-                //Then
-                assertTrue(regularPassengerAdded);
                 assertTrue(vipPassengerAdded);
             }
 
             @Test
+            @DisplayName("When removePassenger Then vip passenger should not be removed")
             void economicFlightRemovePassengers() {
+                int totalPassengers = economicFlight.getPassengers().size();
+                underTest.addPassenger(economicFlight, vipPassenger);
+                assertEquals(++totalPassengers, economicFlight.getPassengers().size());
+                boolean removed = underTest.removePassenger(economicFlight, vipPassenger);
+                assertFalse(removed);
             }
         }
     }
 
     @Nested
+    @DisplayName("Given Business Flight")
     class BusinessFlightPolicyTest {
-        @Test
-        @DisplayName("Given Business Flight When addPassenger Then only vip passenger should be added")
-        void businessFlightAddPassengers() {
-            //Given
-            Flight businessFlight = new Flight();
+        Flight businessFlight;
+        BusinessFlightService underTest = new BusinessFlightService();
+
+        @BeforeEach
+        void setup() {
+            businessFlight = new Flight();
             businessFlight.setId("F2");
             businessFlight.setCategory(FlightCategory.BUSINESS);
             businessFlight.setPassengers(new HashSet<>());
-
-            Passenger regularPassenger = new Passenger();
-            regularPassenger.setId("P1");
-            regularPassenger.setName("João");
-
-            Passenger vipPassenger = new Passenger();
-            vipPassenger.setId("P2");
-            vipPassenger.setName("Maria");
-            vipPassenger.setVip(true);
-
-            //When
-            BusinessFlightService underTest = new BusinessFlightService();
-            boolean regularPassengerAdded = underTest.addPassenger(businessFlight, regularPassenger);
-            boolean vipPassengerAdded = underTest.addPassenger(businessFlight, vipPassenger);
-
-            //Then
-            assertFalse(regularPassengerAdded);
-            assertTrue(vipPassengerAdded);
         }
 
-        @Test
-        void businessFlightRemovePassengers() {
+        @Nested
+        @DisplayName("Given Regular Passenger")
+        class RegularPassengerTest {
+            Passenger regularPassenger;
+
+            @BeforeEach
+            void setup() {
+                regularPassenger = new Passenger();
+                regularPassenger.setId("P1");
+                regularPassenger.setName("João");
+            }
+
+            @Test
+            @DisplayName("When addPassenger Then regular passenger should not be added")
+            void businessFlightAddPassengers() {
+                boolean added = underTest.addPassenger(businessFlight, regularPassenger);
+                assertFalse(added);
+            }
+
+            @Test
+            void businessFlightRemovePassengers() {
+                boolean removed = underTest.removePassenger(businessFlight, regularPassenger);
+                assertFalse(removed);
+            }
+        }
+
+        @Nested
+        @DisplayName("Given Vip Passenger")
+        class VipPassengerTest {
+            Passenger vipPassenger;
+
+            @BeforeEach
+            void setup() {
+                vipPassenger = new Passenger();
+                vipPassenger.setId("P2");
+                vipPassenger.setName("Maria");
+                vipPassenger.setVip(true);
+            }
+
+            @Test
+            @DisplayName("When addPassenger Then vip passenger should be added")
+            void businessFlightAddPassengers() {
+                boolean added = underTest.addPassenger(businessFlight, vipPassenger);
+                assertTrue(added);
+            }
+
+            @Test
+            void businessFlightRemovePassengers() {
+                int totalPassengers = businessFlight.getPassengers().size();
+                underTest.addPassenger(businessFlight, vipPassenger);
+                assertEquals(++totalPassengers, businessFlight.getPassengers().size());
+                boolean removed = underTest.removePassenger(businessFlight, vipPassenger);
+                assertFalse(removed);
+            }
         }
     }
 }
